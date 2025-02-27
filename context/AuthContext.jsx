@@ -20,13 +20,10 @@ const AuthProvider = ({ children }) => {
 
                 setSession(data.session);
 
-                setUserType(session?.user?.user_metadata?.options?.data?.user_type);
-
-                if (userType = "provider") {
-                    await fetchProviderUser(data.session.user.id);
-                }
-                if (userType = "user") {
-                    await fetchUser(data.session.user.id);
+                if (session?.user) {
+                    setTimeout(() => {
+                        fetchUser(session.user);
+                    }, 3000)
                 }
                 else {
                     setUser(null);
@@ -40,34 +37,31 @@ const AuthProvider = ({ children }) => {
 
         const fetchUser = async (userId) => {
             try {
-                const { data, error } = await supabase
+                let { data, error } = await supabase
                     .from("user")
                     .select("*")
                     .eq("userid", userId)
                     .single();
 
-                if (error) throw error;
+                setUserType("user")
 
+                if (!data) {
+                    let { data, error } = await supabase
+                        .from("provider")
+                        .select("*")
+                        .eq("providerid", userId)
+                        .single();
+
+                    setUserType("provider")
+                }
+
+                if (error) throw error;
                 setUser(data);
             } catch (error) {
                 setError(error.message);
             }
         };
 
-        const fetchProviderUser = async (userId) => {
-            try {
-                const { data, error } = await supabase
-                    .from("provider")
-                    .select("*")
-                    .eq("providerid", userId)
-                    .single();
-                if (error) throw error;
-                setUser(data);
-            } catch (error) {
-                setError(error.message);
-            }
-
-        }
         fetchSessionAndUser();
 
         const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
@@ -85,7 +79,7 @@ const AuthProvider = ({ children }) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, userType, session, loading, error }}>
+        <AuthContext.Provider value={{ user, session, loading, error }}>
             {children}
         </AuthContext.Provider>
     );
