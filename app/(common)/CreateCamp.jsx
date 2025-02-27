@@ -34,7 +34,7 @@ const AddDonationCamp = () => {
       keyboardShouldPersistTaps="handled"
       contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
     >
-      <Text className="text-3xl font-bold text-black mb-6">
+      <Text className="text-3xl font-cormorantGaramondSemiBold text-blue-900 mb-6">
         Create New Donation Camp
       </Text>
 

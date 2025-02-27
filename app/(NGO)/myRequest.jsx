@@ -11,13 +11,13 @@ const MyRequest = () => {
     {
       id: "1",
       title: "Food Donation Drive",
-      poster: "https://images.unsplash.com/photo-1516979187457-637abb4f9353",
+      poster: "https://t4.ftcdn.net/jpg/01/84/16/83/360_F_184168316_XuIwBx9xLpC6y3E67HpS3EMMDaM6WIju.jpg",
       description: "Providing food for underprivileged families.",
     },
     {
       id: "2",
       title: "Blood Donation Camp",
-      poster: "https://images.unsplash.com/photo-1516979187457-637abb4f9353",
+      poster: "https://www.shutterstock.com/shutterstock/photos/1328701031/display_1500/stock-vector-blood-donation-drive-poster-design-1328701031.jpg",
       description: "A drive to encourage blood donation.",
     },
     {
@@ -26,14 +26,13 @@ const MyRequest = () => {
       poster: "https://images.unsplash.com/photo-1516979187457-637abb4f9353",
       description: "Collecting books for children in need.",
     },
-    
   ]);
 
   return (
     <View className="p-4 flex-1 bg-gray-100">
       {/* Header Section with Button on Top Right */}
       <View className="flex-row justify-between items-center mb-4">
-        <Text className="text-2xl font-bold color-blue-900">My Request</Text>
+        <Text className="text-3xl font-cormorantGaramondBold color-blue-900">My Request</Text>
         <TouchableOpacity
           className="bg-blue-900 py-2 px-4 rounded-lg flex-row items-center"
           onPress={() => router.push("/CreateCamp")}
@@ -46,7 +45,7 @@ const MyRequest = () => {
       {/* Scrollable List of Donation Camps (VERTICAL) */}
       <ScrollView>
         {donationCamps.map((item) => (
-          <View key={item.id} className="bg-white rounded-lg shadow-lg p-4 mb-4">
+          <View key={item.id} className="bg-white rounded-lg shadow-lg p-4 mb-4 border border-black">
             <Image source={{ uri: item.poster }} className="w-full h-40 rounded-lg" />
             <Text className="text-lg font-semibold mt-2">{item.title}</Text>
             <Text className="text-sm text-gray-600 mt-1">{item.description}</Text>

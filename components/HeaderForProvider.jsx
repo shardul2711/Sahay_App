@@ -2,9 +2,9 @@ import { View, Text, TouchableOpacity } from "react-native";
 import React from "react";
 import { router } from "expo-router";
 
-const Header = () => {
+const HeaderForProvider = () => {
   // Hardcoded user data for frontend UI
-  const userEmail = "user@example.com"; // Replace with any email or static value
+  const userEmail = "provider@example.com"; // Replace with any email or static value
   const userName = userEmail.split("@")[0]; // Extract name before @
   const profileInitial = userName[0]?.toUpperCase() || "G"; // Default initial
 
@@ -12,8 +12,8 @@ const Header = () => {
     <View className="p-4 bg-white shadow-md flex-row items-center justify-between">
       {/* Welcome Text */}
       <View>
-        <Text className="text-xl font-cormorantGaramondBold">Welcome, {userName}!</Text>
-        <Text className="text-sm font-cormorantGaramondMedium text-gray-500">
+        <Text className="text-xl font-[OutfitBold]">Welcome, {userName}!</Text>
+        <Text className="text-sm font-[OutfitBold] text-gray-500">
           Have a great day!
         </Text>
       </View>
@@ -32,4 +32,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default HeaderForProvider;
