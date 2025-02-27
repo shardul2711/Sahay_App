@@ -1,12 +1,23 @@
 import { View, Text, ImageBackground } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import images from "../constants/images";
 import { useRouter } from "expo-router";
-import { Colors } from "../constants/Colors"; // Import colors from Colors.ts
-import Button from "../components/Button"; // Import the Button component
+import Button from "../components/Button";
+import { useAuth } from "../context/AuthContext"
 
 const Index = () => {
   const router = useRouter();
+  const { user, userType, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading) {
+      if (userType === "provider") {
+        router.push("/(shopkeeper)/home");
+      } else if (userType === "user") {
+        router.push("/(NGO)/home");
+      }
+    }
+  }, [loading, userType]);
 
   return (
     <ImageBackground
@@ -30,11 +41,9 @@ const Index = () => {
           सेवा, आशा और विश्वास का संगम!
         </Text>
 
-        {/* Custom Button */}
         <Button
           title="Get Started"
           onPress={() => router.push("/signIn")}
-          // No need to pass buttonStyle or textStyle unless overriding defaults
         />
       </View>
     </ImageBackground>
