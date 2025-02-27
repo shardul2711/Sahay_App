@@ -1,10 +1,12 @@
 import { View, Text } from 'react-native'
 import React from 'react'
+import AllDonations from '../../components/AllDonation'
 
 const AllDonation = () => {
   return (
     <View>
-      <Text>AllDonation</Text>
+      
+      <AllDonations/>
     </View>
   )
 }
