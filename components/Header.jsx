@@ -20,7 +20,7 @@ const Header = () => {
 
       {/* Profile Circle */}
       <TouchableOpacity
-        onPress={() => router.push("/(Profile)/Profile")}
+        onPress={() => router.push("/profile")}
         className="w-12 h-12 bg-blue-900 rounded-full items-center justify-center"
         activeOpacity={0.7}
       >
