@@ -7,14 +7,16 @@ import { useAuth } from "../context/AuthContext"
 
 const Index = () => {
   const router = useRouter();
-  const { user, userType, loading } = useAuth();
+  const { user, userType, loading, session } = useAuth();
 
   useEffect(() => {
+    console.log(session)
+    console.log(userType)
     if (!loading) {
       if (userType === "provider") {
-        router.push("/(shopkeeper)/home");
+        router.replace("/(shopkeeper)/home");
       } else if (userType === "user") {
-        router.push("/(NGO)/home");
+        router.replace("/(NGO)/home");
       }
     }
   }, [loading, userType]);

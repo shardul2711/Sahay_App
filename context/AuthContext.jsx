@@ -8,7 +8,7 @@ const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [session, setSession] = useState(null);
     const [error, setError] = useState(null);
-    const [userType, setUserType] = useState(null);
+    const [userType, setUserType] = useState("");
 
     useEffect(() => {
         const fetchSessionAndUser = async () => {
@@ -20,13 +20,11 @@ const AuthProvider = ({ children }) => {
 
                 setSession(data.session);
 
-                if (session?.user) {
-                    setTimeout(() => {
-                        fetchUser(session.user);
-                    }, 3000)
-                }
-                else {
+                if (data.session?.user) {
+                    fetchUser(data.session.user.id);
+                } else {
                     setUser(null);
+                    setUserType("");
                 }
             } catch (error) {
                 setError(error.message);
@@ -37,26 +35,35 @@ const AuthProvider = ({ children }) => {
 
         const fetchUser = async (userId) => {
             try {
-                let { data, error } = await supabase
+                let { data: userData, error: userError } = await supabase
                     .from("user")
                     .select("*")
                     .eq("userid", userId)
                     .single();
 
-                setUserType("user")
+                if (userError && userError.code !== "PGRST116") throw userError;
 
-                if (!data) {
-                    let { data, error } = await supabase
-                        .from("provider")
-                        .select("*")
-                        .eq("providerid", userId)
-                        .single();
-
-                    setUserType("provider")
+                if (userData) {
+                    setUser(userData);
+                    setUserType("user");
+                    return;
                 }
 
-                if (error) throw error;
-                setUser(data);
+                let { data: providerData, error: providerError } = await supabase
+                    .from("provider")
+                    .select("*")
+                    .eq("providerid", userId)
+                    .single();
+
+                if (providerError) throw providerError;
+
+                if (providerData) {
+                    setUser(providerData);
+                    setUserType("provider");
+                } else {
+                    setUser(null);
+                    setUserType("");
+                }
             } catch (error) {
                 setError(error.message);
             }
@@ -70,6 +77,7 @@ const AuthProvider = ({ children }) => {
                 fetchUser(session.user.id);
             } else {
                 setUser(null);
+                setUserType("");
             }
         });
 
@@ -79,7 +87,7 @@ const AuthProvider = ({ children }) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, session, loading, error }}>
+        <AuthContext.Provider value={{ user, userType, session, loading, error }}>
             {children}
         </AuthContext.Provider>
     );

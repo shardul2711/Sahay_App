@@ -1,6 +1,7 @@
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Button from "../../components/Button";
 import FormField from '../../components/FormField';
 import supabase from '../../supabase/supabaseConfig';
@@ -13,9 +14,6 @@ const SignIn = () => {
 
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [user, setUser] = useState(null);
-  const [error, setError] = useState('');
-
   const router = useRouter();
 
   const handleSignIn = async () => {
@@ -62,62 +60,65 @@ const SignIn = () => {
       }
 
       if (error) throw error;
-      setUser(data);
     } catch (error) {
-      setError(error.message);
+      setErrorMessage(error.message);
     }
   };
 
   return (
-    <View className="flex-1 justify-center items-center bg-gray-100 p-6">
-      <View className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
-        <Text className="text-3xl text-center text-gray-800 mb-8 font-cormorantGaramondBold">
-          Sign In
-        </Text>
+    <GestureHandlerRootView className="flex-1">
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <View className="flex-1 justify-center items-center bg-gray-100 p-6">
+          <View className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
+            <Text className="text-3xl text-center text-gray-800 mb-8 font-cormorantGaramondBold">
+              Sign In
+            </Text>
 
-        {errorMessage ? (
-          <Text className="text-red-500 text-center mb-4">{errorMessage}</Text>
-        ) : null}
+            {errorMessage ? (
+              <Text className="text-red-500 text-center mb-4">{errorMessage}</Text>
+            ) : null}
 
-        <FormField
-          title="Email"
-          placeholder="Enter your email"
-          value={form.email}
-          handleChangeText={(e) => setForm({ ...form, email: e })}
-          keyboardType="email-address"
-        />
+            <FormField
+              title="Email"
+              placeholder="Enter your email"
+              value={form.email}
+              handleChangeText={(e) => setForm({ ...form, email: e })}
+              keyboardType="email-address"
+            />
 
-        <FormField
-          title="Password"
-          placeholder="Enter Your Password"
-          value={form.password}
-          handleChangeText={(e) => setForm({ ...form, password: e })}
-          secureTextEntry
-        />
+            <FormField
+              title="Password"
+              placeholder="Enter Your Password"
+              value={form.password}
+              handleChangeText={(e) => setForm({ ...form, password: e })}
+              secureTextEntry
+            />
 
-        <Button
-          title={loading ? "Logging In..." : "Log In"}
-          onPress={handleSignIn}
-          buttonStyle="w-full mb-6"
-          textStyle="text-lg"
-          disabled={loading}
-        />
+            <Button
+              title={loading ? "Logging In..." : "Log In"}
+              onPress={handleSignIn}
+              buttonStyle="w-full mb-6"
+              textStyle="text-lg"
+              disabled={loading}
+            />
 
-        <View className="flex-row justify-center mb-2">
-          <Text className="text-gray-600">Don't have an account? SignUp as </Text>
-          <TouchableOpacity onPress={() => router.push('/signUp')}>
-            <Text className="text-primary font-semibold underline">Donator</Text>
-          </TouchableOpacity>
+            <View className="flex-row justify-center mb-2">
+              <Text className="text-gray-600">Don't have an account? SignUp as </Text>
+              <TouchableOpacity onPress={() => router.push('/signUp')}>
+                <Text className="text-primary font-semibold underline">Donator</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View className="flex-row justify-center">
+              <Text className="text-gray-600">Don't have an account? SignUp as </Text>
+              <TouchableOpacity onPress={() => router.push('/signUpVendor')}>
+                <Text className="text-primary font-semibold underline">Provider</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
-
-        <View className="flex-row justify-center">
-          <Text className="text-gray-600">Don't have an account? SignUp as </Text>
-          <TouchableOpacity onPress={() => router.push('/signUpVendor')}>
-            <Text className="text-primary font-semibold underline">Provider</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
+      </ScrollView>
+    </GestureHandlerRootView>
   );
 };
 
