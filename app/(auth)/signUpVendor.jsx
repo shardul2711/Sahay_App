@@ -13,9 +13,10 @@ const SignUp = () => {
     name: '',
     email: '',
     gender: '',
-    phoneNumber: '',
+    phonenumber: '', // Updated to match database column
     password: '',
     confirmPassword: '',
+    type: '', // Added type field
   });
 
   const [loading, setLoading] = useState(false);
@@ -24,7 +25,16 @@ const SignUp = () => {
   const router = useRouter();
 
   const handleSignUp = async () => {
-    if (!form.email || !form.password || !form.confirmPassword || !form.name || !form.phoneNumber || !form.gender) {
+    console.log('Form Data:', form); // Debugging: Log form data
+    if (
+      !form.email ||
+      !form.password ||
+      !form.confirmPassword ||
+      !form.name ||
+      !form.phonenumber ||
+      !form.gender ||
+      !form.type // Ensure type is selected
+    ) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
@@ -45,20 +55,21 @@ const SignUp = () => {
 
       const userId = data.user?.id;
 
-      const { error: dbError } = await supabase.from('user').insert([
+      const { error: dbError } = await supabase.from('provider').insert([
         {
-          userid: userId,
+          providerid: userId,
           name: form.name,
           email: form.email,
           gender: form.gender,
-          phoneNumber: form.phoneNumber,
+          phonenumber: form.phonenumber, // Updated to match database column
+          Type: form.type, // Include type in the database
         },
       ]);
 
       if (dbError) throw dbError;
 
       Alert.alert('Success', 'Account created successfully!');
-      router.push('/(NGO)/home');
+      router.push('/(shopkeeper)/home');
     } catch (error) {
       Alert.alert('Sign Up Failed', error.message);
     } finally {
@@ -101,13 +112,14 @@ const SignUp = () => {
               keyboardType="email-address"
             />
 
+            {/* Gender Picker */}
             <View className="mb-6">
               <Text className="text-sm font-medium text-gray-700 mb-2">Gender</Text>
               <View className="w-full h-12 px-3 py-1 border border-gray-300 rounded-lg bg-white">
                 <Picker
                   selectedValue={form.gender}
                   onValueChange={(itemValue) => setForm({ ...form, gender: itemValue })}
-                  style={{ color: "black" }}
+                  style={{ color: 'black' }}
                 >
                   <Picker.Item label="Select Gender" value="" enabled={false} color="gray" />
                   <Picker.Item label="Male" value="Male" />
@@ -117,11 +129,31 @@ const SignUp = () => {
               </View>
             </View>
 
+            {/* Type Picker */}
+            <View className="mb-6">
+              <Text className="text-sm font-medium text-gray-700 mb-2">Type</Text>
+              <View className="w-full h-12 px-3 py-1 border border-gray-300 rounded-lg bg-white">
+                <Picker
+                  selectedValue={form.type}
+                  onValueChange={(itemValue) => setForm({ ...form, type: itemValue })}
+                  style={{ color: 'black' }}
+                >
+                  <Picker.Item label="Select Type" value="" enabled={false} color="gray" />
+                  <Picker.Item label="Shopkeepers" value="Shopkeepers" />
+                  <Picker.Item label="Pharmacy" value="Pharmacy" />
+                  <Picker.Item label="Doctors" value="Doctors" />
+                  <Picker.Item label="Teacher" value="Teacher" />
+                  <Picker.Item label="Caretaker" value="Caretaker" />
+                  <Picker.Item label="Cook" value="Cook" />
+                </Picker>
+              </View>
+            </View>
+
             <FormField
               title="Phone Number"
               placeholder="Enter your phone number"
-              value={form.phoneNumber}
-              handleChangeText={(e) => setForm({ ...form, phoneNumber: e })}
+              value={form.phonenumber} // Updated to phonenumber
+              handleChangeText={(e) => setForm({ ...form, phonenumber: e })} // Updated to phonenumber
               keyboardType="phone-pad"
             />
 
@@ -164,7 +196,7 @@ const SignUp = () => {
             )}
 
             <Button
-              title={loading ? "Signing Up..." : "Sign Up"}
+              title={loading ? 'Signing Up...' : 'Sign Up'}
               onPress={handleSignUp}
               buttonStyle="w-full mb-6 ml-1"
               textStyle="text-lg"
