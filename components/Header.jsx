@@ -12,8 +12,8 @@ const Header = () => {
     <View className="p-4 bg-white shadow-md flex-row items-center justify-between">
       {/* Welcome Text */}
       <View>
-        <Text className="text-xl font-[OutfitBold]">Welcome, {userName}!</Text>
-        <Text className="text-sm font-[OutfitBold] text-gray-500">
+        <Text className="text-xl font-cormorantGaramondBold">Welcome, {userName}!</Text>
+        <Text className="text-sm font-cormorantGaramondMedium text-gray-500">
           Have a great day!
         </Text>
       </View>

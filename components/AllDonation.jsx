@@ -1,6 +1,7 @@
-import { View, Text, FlatList, Image } from "react-native";
+import { View, Text, FlatList, Image, Pressable } from "react-native";
 import React, { useState } from "react";
 import { Picker } from "@react-native-picker/picker";
+import { useRouter } from "expo-router";
 
 const campaigns = [
   {
@@ -37,6 +38,7 @@ const campaigns = [
 
 const Campaigns = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const router = useRouter();
 
   const filteredCampaigns =
     selectedCategory === "All"
@@ -51,29 +53,48 @@ const Campaigns = () => {
       keyboardShouldPersistTaps="handled"
       ListHeaderComponent={
         <View className="p-4">
-          <Text className="text-2xl font-bold mb-4">Select Category</Text>
-          <Picker
-            selectedValue={selectedCategory}
-            onValueChange={(itemValue) => setSelectedCategory(itemValue)}
-            className="mb-4 border border-black-300 rounded"
-          >
-            <Picker.Item label="All" value="All" />
-            <Picker.Item label="Food" value="Food" />
-            <Picker.Item label="Education" value="Education" />
-            <Picker.Item label="Environment" value="Environment" />
-            <Picker.Item label="Health" value="Health" />
-          </Picker>
+          <Text className="text-3xl font-cormorantGaramondBold mb-4 text-blue-900">Select Category</Text>
+          <View className="border border-black rounded">
+            <Picker
+              selectedValue={selectedCategory}
+              onValueChange={(itemValue) => setSelectedCategory(itemValue)}
+              className="mb-4"
+            >
+              <Picker.Item label="All" value="All" />
+              <Picker.Item label="Food" value="Food" />
+              <Picker.Item label="Education" value="Education" />
+              <Picker.Item label="Environment" value="Environment" />
+              <Picker.Item label="Health" value="Health" />
+            </Picker>
+          </View>
         </View>
       }
       renderItem={({ item }) => (
-        <View className="w-full bg-white rounded-lg shadow-lg p-4 mb-4">
-          <Image source={{ uri: item.poster }} className="w-full h-40 rounded-lg" />
-          <Text className="text-lg font-semibold mt-2">{item.title}</Text>
-          <Text className="text-sm text-gray-600 mt-1">{item.description}</Text>
-          <Text className="text-sm text-gray-600 mt-1">City: {item.city}</Text>
-          <Text className="text-sm text-gray-600 mt-1">Organization: {item.organization}</Text>
-          <Text className="text-sm text-gray-600 mt-1">Rating: {item.rating}⭐</Text>
-        </View>
+        <Pressable
+          onPress={() =>
+            router.push({
+              pathname: "/CampDetails",
+              params: {
+                id: item.id,
+                title: item.title,
+                city: item.city,
+                organization: item.organization,
+                rating: item.rating,
+                description: item.description,
+                poster: item.poster,
+              },
+            })
+          }
+        >
+          <View className="bg-white rounded-lg shadow-lg p-4 mx-4 my-2 border border-black">
+            <Image source={{ uri: item.poster }} className="w-full h-40 rounded-lg" />
+            <Text className="text-lg font-semibold mt-2">{item.title}</Text>
+            <Text className="text-sm text-gray-600 mt-1">{item.description}</Text>
+            <Text className="text-sm text-gray-600 mt-1">City: {item.city}</Text>
+            <Text className="text-sm text-gray-600 mt-1">Organization: {item.organization}</Text>
+            <Text className="text-sm text-gray-600 mt-1">Rating: {item.rating}⭐</Text>
+          </View>
+        </Pressable>
       )}
     />
   );

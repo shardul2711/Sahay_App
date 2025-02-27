@@ -47,7 +47,7 @@ const SignIn = () => {
         {/* Sign In Button */}
         <Button
           title="LogIn"
-          onPress={() => router.push("/home")}
+          onPress={() => router.push("/(NGO)/home")}
           buttonStyle="w-full mb-6" // Additional styles for the button
           textStyle="text-lg"
         // No need to pass buttonStyle or textStyle unless overriding defaults

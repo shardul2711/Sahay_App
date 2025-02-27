@@ -25,7 +25,7 @@ const campaigns = [
 const OngoingCampaigns = () => {
   return (
     <View className="p-4">
-      <Text className="text-lg font-bold mb-4">Ongoing Campaigns</Text>
+      <Text className="text-2xl font-cormorantGaramondBold mb-4">Ongoing Campaigns</Text>
       <FlatList
         data={campaigns}
         keyExtractor={(item) => item.id}
