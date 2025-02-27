@@ -55,17 +55,17 @@ const SignIn = () => {
 
         {/* Donator SignUp Link */}
         <View className="flex-row justify-center mb-2">
-          <Text className="text-gray-600">Don't have an account? </Text>
+          <Text className="text-gray-600">Don't have an account? SignUp as </Text>
           <TouchableOpacity onPress={() => router.push('/signUp')}>
-            <Text className="text-primary font-semibold">SignUp as Donator</Text>
+            <Text className="text-primary font-semibold underline">Donator</Text>
           </TouchableOpacity>
         </View>
 
         {/* Provider SignUp Link */}
         <View className="flex-row justify-center">
-          <Text className="text-gray-600">Don't have an account? </Text>
+          <Text className="text-gray-600">Don't have an account? SignUp as </Text>
           <TouchableOpacity onPress={() => router.push('/signUpVendor')}>
-            <Text className="text-primary font-semibold">SignUp as Provider</Text>
+            <Text className="text-primary font-semibold underline">Provider</Text>
           </TouchableOpacity>
         </View>
       </View>
