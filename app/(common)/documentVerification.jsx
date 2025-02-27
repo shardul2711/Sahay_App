@@ -9,7 +9,6 @@ import {
 import React, { useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as DocumentPicker from "expo-document-picker";
-import { supabase } from "../../supabase/supabaseConfig"; // ✅ Correct
 
 const FormField = ({
   title,
@@ -72,75 +71,14 @@ const DocumentVerification = () => {
     }
   };
 
-  const uploadFile = async (file, fileName) => {
-    try {
-      // Fetch the file as a blob
-      const response = await fetch(file.uri);
-      const blob = await response.blob();
-
-      // Upload the blob to Supabase Storage
-      const { data, error } = await supabase.storage
-        .from("documents") // Ensure this bucket exists in Supabase Storage
-        .upload(`${fileName}/${file.name}`, blob, {
-          contentType: "application/pdf",
-        });
-
-      if (error) {
-        console.error("Error uploading file:", error);
-        return null;
-      }
-
-      // Correct way to get the public URL
-      const { data: publicUrlData } = await supabase.storage
-        .from("documents")
-        .getPublicUrl(data.path);
-
-      return publicUrlData.publicUrl; // Corrected access
-    } catch (error) {
-      console.error("Error uploading file:", error);
-      return null;
-    }
-  };
-
   const handleSubmit = async () => {
     if (!panCard || !identityCard || !accNoBank || !ifscCode) {
       Alert.alert("Error", "Please fill all fields");
       return;
     }
 
-    // Upload PAN card
-    const panCardUrl = await uploadFile(panCard, "panCard");
-    if (!panCardUrl) {
-      Alert.alert("Error", "Failed to upload PAN card");
-      console.log(error);
-      return;
-    }
-
-    // Upload Identity card
-    const identityCardUrl = await uploadFile(identityCard, "identityCard");
-    if (!identityCardUrl) {
-      Alert.alert("Error", "Failed to upload Identity card");
-      console.log(error);
-      return;
-    }
-
-    // Insert data into Supabase table
-    const { data, error } = await supabase
-      .from("document_verification")
-      .insert([
-        {
-          pan_card_url: panCardUrl,
-          identity_card_url: identityCardUrl,
-          acc_no_bank: accNoBank,
-          ifsc_code: ifscCode,
-        },
-      ]);
-
-    if (error) {
-      Alert.alert("Error", error.message);
-    } else {
-      Alert.alert("Success", "Document verification submitted successfully");
-    }
+    // Simulate form submission
+    Alert.alert("Success", "Form submitted successfully (front-end only)");
   };
 
   return (
