@@ -10,7 +10,7 @@ const recentStats = [
 const RecentStatus = () => {
   return (
     <View className="p-4 bg-gradient-to-r from-blue-400 to-blue-600 rounded-lg">
-      <Text className="text-lg font-bold text-black mb-4">Recent Status</Text>
+      <Text className="text-2xl font-cormorantGaramondBold text-black mb-4">Recent Status</Text>
       <View className="flex-row justify-between">
         {recentStats.map((stat) => (
           <View 
