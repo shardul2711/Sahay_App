@@ -8,7 +8,7 @@ const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [session, setSession] = useState(null);
     const [error, setError] = useState(null);
-    const [userType, setUserType] = useState(null);
+    const [userType, setUserType] = useState("");
 
     useEffect(() => {
         const fetchSessionAndUser = async () => {
@@ -20,16 +20,11 @@ const AuthProvider = ({ children }) => {
 
                 setSession(data.session);
 
-                setUserType(session?.user?.user_metadata?.options?.data?.user_type);
-
-                if (userType = "provider") {
-                    await fetchProviderUser(data.session.user.id);
-                }
-                if (userType = "user") {
-                    await fetchUser(data.session.user.id);
-                }
-                else {
+                if (data.session?.user) {
+                    fetchUser(data.session.user.id);
+                } else {
                     setUser(null);
+                    setUserType("");
                 }
             } catch (error) {
                 setError(error.message);
@@ -40,34 +35,40 @@ const AuthProvider = ({ children }) => {
 
         const fetchUser = async (userId) => {
             try {
-                const { data, error } = await supabase
+                let { data: userData, error: userError } = await supabase
                     .from("user")
                     .select("*")
                     .eq("userid", userId)
                     .single();
 
-                if (error) throw error;
+                if (userError && userError.code !== "PGRST116") throw userError;
 
-                setUser(data);
+                if (userData) {
+                    setUser(userData);
+                    setUserType("user");
+                    return;
+                }
+
+                let { data: providerData, error: providerError } = await supabase
+                    .from("provider")
+                    .select("*")
+                    .eq("providerid", userId)
+                    .single();
+
+                if (providerError) throw providerError;
+
+                if (providerData) {
+                    setUser(providerData);
+                    setUserType("provider");
+                } else {
+                    setUser(null);
+                    setUserType("");
+                }
             } catch (error) {
                 setError(error.message);
             }
         };
 
-        const fetchProviderUser = async (userId) => {
-            try {
-                const { data, error } = await supabase
-                    .from("provider")
-                    .select("*")
-                    .eq("providerid", userId)
-                    .single();
-                if (error) throw error;
-                setUser(data);
-            } catch (error) {
-                setError(error.message);
-            }
-
-        }
         fetchSessionAndUser();
 
         const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
@@ -76,6 +77,7 @@ const AuthProvider = ({ children }) => {
                 fetchUser(session.user.id);
             } else {
                 setUser(null);
+                setUserType("");
             }
         });
 
