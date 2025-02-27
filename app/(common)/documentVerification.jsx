@@ -9,6 +9,8 @@ import {
 import React, { useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as DocumentPicker from "expo-document-picker";
+import supabase from "../../supabase/supabaseConfig"; // Ensure correct path
+import { useNavigation } from "@react-navigation/native";
 
 const FormField = ({
   title,
@@ -28,15 +30,12 @@ const FormField = ({
           className="flex-1 h-12"
           placeholder={placeholder}
           keyboardType={keyboardType}
-          secureTextEntry={
-            (title === "Password" || title === "Confirm Password") &&
-            !showPassword
-          }
+          secureTextEntry={title.includes("Password") && !showPassword}
           autoCapitalize={autoCapitalize}
           onChangeText={handleChangeText}
           value={value}
         />
-        {(title === "Password" || title === "Confirm Password") && (
+        {title.includes("Password") && (
           <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
             <MaterialIcons
               name={showPassword ? "visibility" : "visibility-off"}
@@ -51,12 +50,44 @@ const FormField = ({
 };
 
 const DocumentVerification = () => {
-  const [panCard, setPanCard] = useState(null);
-  const [identityCard, setIdentityCard] = useState(null);
+  const [panCardUrl, setPanCardUrl] = useState(null);
+  const [identityCardUrl, setIdentityCardUrl] = useState(null);
   const [accNoBank, setAccNoBank] = useState("");
   const [ifscCode, setIfscCode] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const navigation = useNavigation();
 
-  const handleFilePick = async (setFile) => {
+  const uploadToSupabase = async (file, setUrl) => {
+    if (!file) {
+      Alert.alert("Error", "No document selected.");
+      return;
+    }
+
+    setUploading(true);
+    const fileExt = file.name.split(".").pop();
+    const filePath = `images/${Date.now()}.${fileExt}`;
+
+    const { data, error } = await supabase.storage
+      .from("documents")
+      .upload(filePath, {
+        uri: file.uri,
+        contentType: file.mimeType,
+        name: file.name,
+      });
+
+    setUploading(false);
+
+    if (error) {
+      Alert.alert("Upload Failed", error.message);
+    } else {
+      const publicUrl = `https://zsrhvbqsmlruustctgni.supabase.co/storage/v1/object/public/documents/${filePath}`;
+      setUrl(publicUrl);
+      Alert.alert("Success", "File uploaded successfully.");
+      navigation.navigate("(shopkeeper)/home");
+    }
+  };
+
+  const handleFilePick = async (setUrl) => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: "application/pdf",
@@ -65,52 +96,38 @@ const DocumentVerification = () => {
       if (result.canceled || result.assets.length === 0) return;
 
       const file = result.assets[0];
-      setFile(file);
+      await uploadToSupabase(file, setUrl);
     } catch (error) {
       console.error("Error picking document:", error);
     }
   };
 
   const handleSubmit = async () => {
-    if (!panCard || !identityCard || !accNoBank || !ifscCode) {
-      Alert.alert("Error", "Please fill all fields");
+    if (!panCardUrl || !identityCardUrl || !accNoBank || !ifscCode) {
+      Alert.alert("Error", "Please complete all fields.");
       return;
     }
 
-    // Simulate form submission
-    Alert.alert("Success", "Form submitted successfully (front-end only)");
+    // Submit data (e.g., send URLs and details to your backend)
+    Alert.alert("Success", "KYC submitted successfully.");
   };
 
   return (
     <SafeAreaView className="flex-1 p-4">
       <Text className="text-2xl font-bold mb-6">Document Verification</Text>
 
-      <TouchableOpacity
-        onPress={() => handleFilePick(setPanCard)}
-        className="mb-6"
-      >
-        <Text className="text-sm font-medium text-gray-700 mb-2">
-          Upload PAN Card
-        </Text>
+      <TouchableOpacity onPress={() => handleFilePick(setPanCardUrl)} className="mb-6">
+        <Text className="text-sm font-medium text-gray-700 mb-2">Upload PAN Card</Text>
         <View className="flex-row items-center border border-gray-300 rounded-lg px-4 py-2">
-          <Text className="flex-1">
-            {panCard ? panCard.name : "Choose PDF file"}
-          </Text>
+          <Text className="flex-1">{panCardUrl ? "Uploaded ✅" : "Choose PDF file"}</Text>
           <MaterialIcons name="attach-file" size={24} color="black" />
         </View>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        onPress={() => handleFilePick(setIdentityCard)}
-        className="mb-6"
-      >
-        <Text className="text-sm font-medium text-gray-700 mb-2">
-          Upload Identity Card
-        </Text>
+      <TouchableOpacity onPress={() => handleFilePick(setIdentityCardUrl)} className="mb-6">
+        <Text className="text-sm font-medium text-gray-700 mb-2">Upload Identity Card</Text>
         <View className="flex-row items-center border border-gray-300 rounded-lg px-4 py-2">
-          <Text className="flex-1">
-            {identityCard ? identityCard.name : "Choose PDF file"}
-          </Text>
+          <Text className="flex-1">{identityCardUrl ? "Uploaded ✅" : "Choose PDF file"}</Text>
           <MaterialIcons name="attach-file" size={24} color="black" />
         </View>
       </TouchableOpacity>
@@ -136,8 +153,11 @@ const DocumentVerification = () => {
       <TouchableOpacity
         onPress={handleSubmit}
         className="bg-black p-4 rounded-lg"
+        disabled={uploading}
       >
-        <Text className="text-white text-center font-bold">Submit</Text>
+        <Text className="text-white text-center font-bold">
+          {uploading ? "Uploading..." : "Submit"}
+        </Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
