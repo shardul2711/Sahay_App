@@ -24,7 +24,7 @@ const SignUpVendor = () => {
   const handleSignUp = () => {
     // Add your sign-up logic here (e.g., API call, validation, etc.)
     // For now, just redirect to the home page
-    router.push('/home'); // Replace '/home' with your home page route
+    router.push('/(shopkeeper)/home'); // Replace '/home' with your home page route
   };
 
   const handleGetLocation = async () => {
