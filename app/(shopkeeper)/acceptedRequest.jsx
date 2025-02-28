@@ -50,7 +50,7 @@ const AcceptedRequest = () => {
       {requests.map((item) => (
         <TouchableOpacity
           key={item.id}
-          className="mb-4 bg-white rounded-2xl shadow-md p-4"
+          className="mb-4 bg-white rounded-2xl shadow-md p-4 border border-black" // ✅ Added black border
           onPress={() =>
             router.push({
               pathname: "/Verification",

@@ -20,6 +20,7 @@ const Campaigns = () => {
         console.error("Error fetching campaigns:", error.message);
       } finally {
         setLoading(false);
+        console.log(campaigns)
       }
     };
     fetchCampaigns();
