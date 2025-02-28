@@ -1,12 +1,50 @@
-import { View, Text, TouchableOpacity } from "react-native";
-import React from "react";
+import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
+import React, { useEffect, useState } from "react";
 import { router } from "expo-router";
+import supabase from "../supabase/supabaseConfig"; // Adjust the path if needed
 
 const Header = () => {
-  // Hardcoded user data for frontend UI
-  const userEmail = "user@example.com"; // Replace with any email or static value
-  const userName = userEmail.split("@")[0]; // Extract name before @
-  const profileInitial = userName[0]?.toUpperCase() || "G"; // Default initial
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch user details from Supabase
+  useEffect(() => {
+    const fetchUserData = async () => {
+      setLoading(true);
+
+      // Get current user session
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+
+      if (sessionError || !sessionData?.session) {
+        router.replace("/signIn"); // Redirect to login if no session found
+        return;
+      }
+
+      const userId = sessionData.session.user.id;
+
+      // Fetch user details from Supabase
+      const { data, error } = await supabase
+        .from("user")
+        .select("name")
+        .eq("userid", userId)
+        .single();
+
+      if (!error) {
+        setUser(data);
+      }
+      
+      setLoading(false);
+    };
+
+    fetchUserData();
+  }, []);
+
+  if (loading) {
+    return <ActivityIndicator size="large" color="blue" className="p-4" />;
+  }
+
+  const userName = user?.name || "Guest";
+  const profileInitial = userName[0]?.toUpperCase() || "G";
 
   return (
     <View className="p-4 bg-white shadow-md flex-row items-center justify-between">
