@@ -1,10 +1,19 @@
-import { View, Text, Image, ScrollView } from "react-native";
+import { View, Text, Image, ScrollView, TouchableOpacity, Linking } from "react-native";
 import React from "react";
 import { useLocalSearchParams } from "expo-router";
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from "@expo/vector-icons";
 
 const CampDetails = () => {
-  const { title, city, organization, rating, description, poster, deadline } = useLocalSearchParams();
+  const { title, city, organization, rating, description, poster, deadline, latitude, longitude } = useLocalSearchParams();
+
+console.log("Deadline:", deadline); // Debugging to check if it's received
+
+
+  // Function to open Google Maps with the location
+  const openGoogleMaps = () => {
+    const url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+    Linking.openURL(url);
+  };
 
   return (
     <ScrollView className="flex-1 bg-gray-100 px-4 py-6" contentContainerStyle={{ paddingBottom: 40 }}>
@@ -25,12 +34,14 @@ const CampDetails = () => {
         <Text className="text-base text-gray-800">{description}</Text>
       </View>
 
-      {/* Location */}
+      {/* Location (Clickable Google Maps Link) */}
       <Text className="text-lg font-cormorantGaramondSemiBold text-gray-800 mb-2">Location</Text>
-      <View className="bg-white p-4 rounded-md shadow border border-black mb-3 flex-row items-center gap-2">
-        <Ionicons name="location-sharp" size={20} color="gray" />
-        <Text className="text-base text-gray-800">{city}</Text>
-      </View>
+      <TouchableOpacity onPress={openGoogleMaps}>
+        <View className="bg-white p-4 rounded-md shadow border border-black mb-3 flex-row items-center gap-2">
+          <Ionicons name="location-sharp" size={20} color="gray" />
+          <Text className="text-base text-gray-800 underline">{city} (Tap to Open in Maps)</Text>
+        </View>
+      </TouchableOpacity>
 
       {/* Organization */}
       <Text className="text-lg font-cormorantGaramondSemiBold text-gray-800 mb-2">Organized By</Text>

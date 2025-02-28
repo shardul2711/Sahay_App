@@ -1,45 +1,49 @@
-import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
-import React from "react";
+import { View, Text, Image, ScrollView, TouchableOpacity, ActivityIndicator, Linking } from "react-native";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
-
-const requests = [
-  {
-    id: "1",
-    title: "Save the Rainforest",
-    city: "Amazon, Brazil",
-    organization: "Green Earth Org",
-    rating: "4.8",
-    category: "Environment",
-    description: "Help us protect the rainforest and its wildlife.",
-    poster:
-      "https://blog.plant-for-the-planet.org/wp-content/uploads/2021/09/TFJ-YouTube-Banner-01.png",
-  },
-  {
-    id: "2",
-    title: "Education for All",
-    city: "Delhi, India",
-    organization: "Teach the Future",
-    rating: "4.5",
-    category: "Education",
-    description: "Providing education resources for underprivileged children.",
-    poster:
-      "https://www.ei-ie.org/image/VSqQfBuUfi9DcmCM0CGDJeHUbgd7JrUyyUKrEj1c.png/lead.jpg",
-  },
-  {
-    id: "3",
-    title: "Clean Water Initiative",
-    city: "Nairobi, Kenya",
-    organization: "Water for All",
-    rating: "4.7",
-    category: "Health",
-    description: "Ensuring clean drinking water for remote communities.",
-    poster:
-      "https://media.istockphoto.com/id/1320748109/vector/world-water-day-lets-save-the-water-together-text-and-hand-close-water-drip-from-water-tap.jpg?s=612x612&w=0&k=20&c=aMHQbO6WVLpiK48e_UECtriaXXlf1giDoV0PkVSl5JU=",
-  },
-];
+import supabase from "../../supabase/supabaseConfig";
 
 const AcceptedRequest = () => {
   const router = useRouter();
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRequests = async () => {
+      try {
+        const { data, error } = await supabase.from("campaigns").select("*");
+        if (error) throw error;
+
+        // ✅ Parse the location field from JSON string to an object
+        const parsedData = data.map((item) => ({
+          ...item,
+          location: item.location ? JSON.parse(item.location) : { latitude: null, longitude: null },
+        }));
+
+        console.log("Fetched and parsed data:", parsedData); // ✅ Log to verify data
+        setRequests(parsedData);
+      } catch (error) {
+        console.error("Error fetching requests:", error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRequests();
+  }, []);
+
+  const openGoogleMaps = (latitude, longitude) => {
+    console.log("Opening Google Maps with:", { latitude, longitude }); // ✅ Log latitude & longitude
+    if (latitude && longitude) {
+      const url = `https://www.google.com/maps?q=${latitude},${longitude}`;
+      Linking.openURL(url);
+    } else {
+      console.error("Invalid latitude or longitude");
+    }
+  };
+
+  if (loading) {
+    return <ActivityIndicator size="large" color="#0000ff" className="flex-1 justify-center items-center" />;
+  }
 
   return (
     <ScrollView className="p-4">
@@ -55,20 +59,30 @@ const AcceptedRequest = () => {
                 title: item.title,
                 city: item.city,
                 organization: item.organization,
-                rating: item.rating,
                 category: item.category,
                 description: item.description,
-                poster: item.poster,
+                poster: item.imageLink,
+                deadline: item.deadline,
+                latitude: item.location.latitude, // ✅ Use parsed latitude
+                longitude: item.location.longitude, // ✅ Use parsed longitude
               },
             })
           }
         >
-          <Image source={{ uri: item.poster }} className="w-full h-40 rounded-xl" />
+          <Image source={{ uri: item.imageLink }} className="w-full h-40 rounded-xl" />
           <Text className="text-xl font-bold mt-2">{item.title}</Text>
           <Text className="text-gray-600">{item.city}</Text>
           <Text className="text-gray-500">{item.organization}</Text>
-          <Text className="text-blue-600 font-semibold">Rating: {item.rating}</Text>
-          <Text className="text-gray-700 mt-1">{item.category}</Text>
+          <Text className="text-gray-700 mt-1">Category: {item.category}</Text>
+          <Text className="text-gray-700 mt-1">Deadline: {item.deadline}</Text>
+
+          {/* View Map Button */}
+          <TouchableOpacity
+            className="mt-2 bg-blue-500 px-3 py-1 rounded-lg w-36"
+            onPress={() => openGoogleMaps(item.location.latitude, item.location.longitude)}
+          >
+            <Text className="text-white text-center">View on Map</Text>
+          </TouchableOpacity>
         </TouchableOpacity>
       ))}
     </ScrollView>
