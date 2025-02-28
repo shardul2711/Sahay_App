@@ -1,159 +1,197 @@
-import { View, Text, Image, ScrollView, Button, ActivityIndicator } from "react-native";
-import React, { useState } from "react";
+import {
+  View, Text, Image, ScrollView, Button, ActivityIndicator, Alert, SafeAreaView
+} from "react-native";
+import React, { useState, useEffect, useCallback } from "react";
 import { useLocalSearchParams } from "expo-router";
 import * as DocumentPicker from "expo-document-picker";
 import supabase from "../../supabase/supabaseConfig";
-import { Alert } from "react-native";
 
 const Verification = () => {
-  const { id, title, city, organization, rating, category, description, poster } = useLocalSearchParams();
-  const [accepted, setAccepted] = useState(false);
+  const { id, title, city, organization, category, description, poster } = useLocalSearchParams();
+
   const [image, setImage] = useState(null);
-  const [audio, setAudio] = useState(null);
+  const [imageLink, setImageLink] = useState('');
   const [uploading, setUploading] = useState(false);
-  const [imageLink, setImageLink] = useState("");
-  const [audioLink, setAudioLink] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [md5Hash, setMd5Hash] = useState("");
+  const [aiGenerated, setAiGenerated] = useState("No");
+  const [personCount, setPersonCount] = useState("0");
+  const [storedMd5Hash, setStoredMd5Hash] = useState("");
+  const [requiredPersonCount, setRequiredPersonCount] = useState("0");
+  const [showSubmit, setShowSubmit] = useState(false);
 
-  // Function to select an image
+  useEffect(() => {
+    const fetchStoredData = async () => {
+      try {
+        const { data: md5HashData, error } = await supabase
+          .from("campaigns")
+          .select("md5hash");
+
+        if (error) throw error;
+        if (md5HashData) {
+          const hashList = md5HashData.map((item) => item.md5hash);
+          setStoredMd5Hash(hashList);
+        }
+
+        const { data: personCountData, error: personCountError } = await supabase
+          .from("campaigns")
+          .select("requiredpersonCount")
+          .eq("id", id)
+          .single();
+
+        if (personCountError) throw personCountError;
+        if (personCountData) {
+          setRequiredPersonCount(personCountData.requiredpersonCount || "0");
+        }
+      } catch (error) {
+        console.error("Error fetching campaign data:", error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStoredData();
+  }, [id]);
+
   const pickImage = async () => {
-    const result = await DocumentPicker.getDocumentAsync({
-      type: "image/*",
-      copyToCacheDirectory: true,
-    });
-
-    if (!result.canceled) {
-      setImage(result.assets[0]);
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "image/*",
+        copyToCacheDirectory: true,
+      });
+      if (!result.canceled && result.assets?.length > 0) {
+        setImage(result.assets[0]);
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to pick image.");
+      console.error("Image selection error:", error);
     }
   };
 
-  // Function to select an audio file
-  const pickAudio = async () => {
-    const result = await DocumentPicker.getDocumentAsync({
-      type: "audio/*",
-      copyToCacheDirectory: true,
-    });
-
-    if (!result.canceled) {
-      setAudio(result.assets[0]);
-    }
-  };
-
-  // Function to upload file to Supabase
-  const uploadFile = async (selectedFile, fileType) => {
-    if (!selectedFile) {
-      Alert.alert(`No ${fileType} selected`, `Please select a ${fileType} first.`);
+  const uploadImage = useCallback(async () => {
+    if (!image) {
+      Alert.alert("No Image", "Please select an image first.");
       return;
     }
 
-    setUploading(true);
-    const fileExt = selectedFile.name.split(".").pop();
-    const filePath = `${fileType}/${Date.now()}.${fileExt}`;
-
-    const { data, error } = await supabase.storage.from("documents").upload(filePath, {
-      uri: selectedFile.uri,
-      contentType: selectedFile.mimeType,
-      name: selectedFile.name,
+    const formData = new FormData();
+    formData.append("file", {
+      uri: image.uri,
+      name: image.name,
+      type: "image/jpeg",
     });
 
-    setUploading(false);
+    setUploading(true);
+    try {
+      const response = await fetch("http://192.168.16.176:8080/analyze-image/", {
+        method: "POST",
+        body: formData,
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-    if (error) {
-      Alert.alert("Upload Failed", error.message);
-    } else {
-      Alert.alert("Upload Successful", `${fileType.charAt(0).toUpperCase() + fileType.slice(1)} uploaded successfully!`);
+      const responseData = await response.json();
+      console.log("Server Response:", responseData);
 
-      if (fileType === "image") {
-        setImageLink(`https://zsrhvbqsmlruustctgni.supabase.co/storage/v1/object/public/documents/${filePath}`);
-      } else if (fileType === "audio") {
-        setAudioLink(`https://zsrhvbqsmlruustctgni.supabase.co/storage/v1/object/public/documents/${filePath}`);
+      const newMd5Hash = responseData.md5_hash || "N/A";
+      const newPersonCount = responseData.person_count?.toString() || "0";
+      const isAiGenerated = responseData.ai_generated ? "Yes" : "No";
+
+      setMd5Hash(newMd5Hash);
+      setPersonCount(newPersonCount);
+      setAiGenerated(isAiGenerated);
+
+      setShowSubmit(
+        !storedMd5Hash.includes(newMd5Hash) && parseInt(newPersonCount) >= parseInt(requiredPersonCount)
+      );
+
+      Alert.alert("Success", "Image uploaded and analyzed!");
+    } catch (error) {
+      Alert.alert("Upload Failed", "Error uploading image.");
+      console.error("Upload error:", error);
+    } finally {
+      setUploading(false);
+    }
+  }, [image, storedMd5Hash, requiredPersonCount]);
+
+  const handleSubmit = async () => {
+    try {
+      const filePath = `validation/campaign_images/${id}_${image.name}`;
+
+      const { data, error: uploadationError } = await supabase.storage.from("documents").upload(filePath, {
+        uri: image.uri,
+        contentType: image.mimeType,
+        name: image.name,
+      });
+
+      if (uploadationError) {
+        Alert.alert("Upload Failed", uploadationError.message);
+        return;
       }
+
+      const uploadedImageLink = `https://zsrhvbqsmlruustctgni.supabase.co/storage/v1/object/public/documents/${filePath}`;
+
+
+      const { error } = await supabase
+        .from("campaigns")
+        .update({
+          md5hash: md5Hash,
+          validationImage: uploadedImageLink,
+        })
+        .eq("id", id);
+
+      if (error) throw error;
+
+      setImageLink(uploadedImageLink);
+      Alert.alert("Success", "Data updated successfully.");
+      setShowSubmit(false);
+    } catch (error) {
+      Alert.alert("Submission Failed", "Error updating campaign data.");
+      console.error("Submit error:", error);
     }
   };
 
   return (
-    <ScrollView className="p-4">
-      {/* Poster Image */}
-      <Image source={{ uri: poster }} className="w-full h-60 rounded-lg mb-4" />
-
-      {/* Details Section */}
-      {[ 
-        { label: "Title", value: title },
-        { label: "City", value: city },
-        { label: "Organization", value: organization },
-        { label: "Category", value: category },
-        { label: "Description", value: description },
-     
-      ].map((item, index) => (
-        <View key={index} className="border-b pb-2 mb-4 border-gray-300">
-          <Text className="text-xl font-bold text-black">{item.label}</Text>
-          <Text className="text-lg text-gray-700">{item.value}</Text>
-        </View>
-      ))}
-
-      {/* Accept Button */}
-      <View className="mb-6">
-        {accepted ? (
-          <Text className="text-green-600 text-lg font-bold text-center">Accepted</Text>
+    <SafeAreaView className="flex-1 h-full">
+      <ScrollView className="p-4 mb-1 h-full">
+        {loading ? (
+          <ActivityIndicator size="large" color="#1E3A8A" />
         ) : (
-          <Button title="Accept" color="#1E3A8A" onPress={() => setAccepted(true)} />
+          <>
+            <Image source={{ uri: poster }} className="w-full h-60 rounded-lg mb-4" />
+            {[
+              { label: "Title", value: title },
+              { label: "City", value: city },
+              { label: "Organization", value: organization },
+              { label: "Category", value: category },
+              { label: "Description", value: description },
+            ].map((item, index) => (
+              <View key={index} className="border-b pb-2 mb-4 border-gray-300">
+                <Text className="text-xl font-bold text-black">{item.label}</Text>
+                <Text className="text-lg text-gray-700">{item.value}</Text>
+              </View>
+            ))}
+            <Button title="Select Image" color="#1E3A8A" onPress={pickImage} />
+            {image && (
+              <View className="mt-4">
+                <Text className="text-gray-700">Name: {image.name}</Text>
+                <Button title="Upload Image" color="#1E3A8A" onPress={uploadImage} disabled={uploading} />
+                {uploading && <ActivityIndicator size="small" color="#1E3A8A" className="mt-2" />}
+              </View>
+            )}
+            {md5Hash && (
+              <View className="mt-4 p-4 border border-gray-300 rounded-lg bg-gray-100">
+                <Text className="text-green-600 font-bold">Analysis Results:</Text>
+                <Text className="text-black">MD5 Hash: {md5Hash}</Text>
+                <Text className="text-black">AI Generated: {aiGenerated}</Text>
+                <Text className="text-black">Person Count: {personCount}</Text>
+              </View>
+            )}
+            {!showSubmit && <Text className="text-red-600 mt-2">Warning: Submission criteria not met.</Text>}
+            {showSubmit && <Button title="Submit Changes" color="#D97706" onPress={handleSubmit} className="mt-4" />}
+          </>
         )}
-      </View>
-
-      {/* Upload Proof Section (Only Visible After Acceptance) */}
-      {accepted && (
-        <View className="p-4 border border-gray-300 rounded-lg bg-gray-100 mb-6">
-          <Text className="text-lg font-bold text-black mb-4">Upload Proof</Text>
-
-          {/* Image Upload */}
-          <Button title="Select Image" color="#1E3A8A" onPress={pickImage} />
-          {image && (
-            <View className="mt-4">
-              <Text className="text-gray-700">Name: {image.name}</Text>
-              <Text className="text-gray-700">Size: {image.size} bytes</Text>
-              <Button title="Upload Image" color="#1E3A8A" onPress={() => uploadFile(image, "image")} disabled={uploading} />
-              {uploading && <ActivityIndicator size="small" color="#1E3A8A" className="mt-2" />}
-            </View>
-          )}
-
-          {/* Display Uploaded Image Link */}
-          {imageLink !== "" && (
-            <View className="mt-4">
-              <Text className="text-green-600 font-bold">Image Upload Successful!</Text>
-              <Text className="text-blue-600 break-words">{imageLink}</Text>
-            </View>
-          )}
-
-          {/* Add Space Between Image and Audio Upload */}
-          <View className="mt-6" />
-
-          {/* Audio Upload */}
-          <Button title="Select Audio" color="#1E3A8A" onPress={pickAudio} />
-          {audio && (
-            <View className="mt-4">
-              <Text className="text-gray-700">Name: {audio.name}</Text>
-              <Text className="text-gray-700">Size: {audio.size} bytes</Text>
-              <Button title="Upload Audio" color="#1E3A8A" onPress={() => uploadFile(audio, "audio")} disabled={uploading} />
-              {uploading && <ActivityIndicator size="small" color="#1E3A8A" className="mt-2" />}
-            </View>
-          )}
-
-          {/* Display Uploaded Audio Link */}
-          {audioLink !== "" && (
-            <View className="mt-4">
-              <Text className="text-green-600 font-bold">Audio Upload Successful!</Text>
-              <Text className="text-blue-600 break-words">{audioLink}</Text>
-            </View>
-          )}
-        </View>
-      )}
-
-      {/* Submit Button with Bottom Margin */}
-      {accepted && (
-        <View className="mb-10">
-          <Button title="Submit" color="#1E3A8A" onPress={() => Alert.alert("Submitted", "Your response has been recorded!")} />
-        </View>
-      )}
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
