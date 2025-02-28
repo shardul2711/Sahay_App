@@ -1,8 +1,9 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Alert } from "react-native";
 import React from "react";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import supabase from "../../supabase/supabaseConfig";
+import Button from '../../components/Button';
 
 const ShopkeeperProfile = () => {
   const router = useRouter();
@@ -40,6 +41,15 @@ const ShopkeeperProfile = () => {
         <Feather name="log-out" size={24} color="white" />
         <Text style={{ color: "white", fontSize: 18, marginLeft: 8 }}>Logout</Text>
       </TouchableOpacity>
+
+      <View className="items-center mt-4">
+  <Button
+    title="Sell Token"
+    onPress={() => Alert.alert("Sell Token", "Token Sell successful!!")}
+    buttonStyle='bg-purple-700'
+    textStyle="text-black font-bold"
+  />
+</View>
     </View>
   );
 };

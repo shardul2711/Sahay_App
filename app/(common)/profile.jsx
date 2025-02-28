@@ -5,6 +5,7 @@ import { Picker } from '@react-native-picker/picker';
 import * as Location from 'expo-location';
 import { MaterialIcons } from '@expo/vector-icons';
 import supabase from '../../supabase/supabaseConfig';
+import Button from '../../components/Button'
 
 const Profile = () => {
   const router = useRouter();
@@ -152,12 +153,24 @@ const Profile = () => {
 
         {/* Save Button */}
         <TouchableOpacity
-          className={`p-3 rounded ${saving ? 'bg-gray-400' : 'bg-green-500'}`}
+          className={`p-3 rounded ${saving ? 'bg-gray-400' : 'bg-black'}`}
           onPress={handleSaveLocation}
           disabled={saving}
         >
           <Text className="text-white text-center">{saving ? 'Saving...' : 'Save Location'}</Text>
         </TouchableOpacity>
+
+{/* Buy Token Button below the card */}
+<View className="items-center mt-4">
+  <Button
+    title="Buy Token"
+    onPress={() => Alert.alert("Buy Token", "Token purchase successful!!")}
+    buttonStyle='bg-purple-700'
+    textStyle="text-black font-bold"
+  />
+</View>
+
+
       </View>
     </View>
   );
