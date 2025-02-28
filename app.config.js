@@ -34,6 +34,14 @@ export default {
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "recordAudioAndroid": true
+        }
       ]
     ],
     "experiments": {
@@ -42,7 +50,7 @@ export default {
     "extra": {
       SUPABASE_URL: process.env.SUPABASE_URL,
       SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
-      SUPABASE_SERVICE_ROLE : process.env.SUPABASE_SERVICE_ROLE,
+      SUPABASE_SERVICE_ROLE: process.env.SUPABASE_SERVICE_ROLE,
     },
   }
 }

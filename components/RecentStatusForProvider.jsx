@@ -20,7 +20,7 @@ const RecentStatusForProvider = () => {
 
   return (
     <View className="p-4 bg-gradient-to-r from-blue-400 to-blue-600 rounded-lg">
-      <Text className="text-lg font-bold text-black mb-4">Complete Verification</Text>
+      <Text className="text-lg font-cormorantGaramondBold text-black mb-4">Complete Verification</Text>
       <View className="flex-row justify-between">
         {recentStats.map((stat) => (
           <TouchableOpacity
