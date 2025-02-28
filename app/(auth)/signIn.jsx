@@ -102,19 +102,21 @@ const SignIn = () => {
               disabled={loading}
             />
 
-            <View className="flex-row justify-center mb-2">
-              <Text className="text-gray-600">Don't have an account? SignUp as </Text>
-              <TouchableOpacity onPress={() => router.push('/signUp')}>
-                <Text className="text-primary font-semibold underline">Donator</Text>
-              </TouchableOpacity>
+            <View className="flex-column justify-center items-center mb-2">
+              <Text className="text-gray-600">Don't have an account?</Text>
+              <View className="flex-row">
+
+                <Text className="text-gray-600"> Sign Up as </Text>
+                <TouchableOpacity onPress={() => router.push('/signUp')}>
+                  <Text className="text-primary font-semibold underline">Donator </Text>
+                </TouchableOpacity>
+                <Text className="text-gray-600">or </Text>
+                <TouchableOpacity onPress={() => router.push('/signUpVendor')}>
+                  <Text className="text-primary font-semibold underline">Provider</Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
-            <View className="flex-row justify-center">
-              <Text className="text-gray-600">Don't have an account? SignUp as </Text>
-              <TouchableOpacity onPress={() => router.push('/signUpVendor')}>
-                <Text className="text-primary font-semibold underline">Provider</Text>
-              </TouchableOpacity>
-            </View>
           </View>
         </View>
       </ScrollView>
