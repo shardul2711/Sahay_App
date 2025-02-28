@@ -14,7 +14,7 @@ const ShopkeeperProfile = () => {
       if (error) throw error;
 
       // Navigate to login page after logout
-      router.replace("/signIn");
+      router.replace(" /signIn");
     } catch (error) {
       console.error("Logout Error:", error.message);
     }
