@@ -82,7 +82,7 @@ const Verification = () => {
         { label: "Organization", value: organization },
         { label: "Category", value: category },
         { label: "Description", value: description },
-        { label: "Rating", value: `⭐ ${rating}` }
+     
       ].map((item, index) => (
         <View key={index} className="border-b pb-2 mb-4 border-gray-300">
           <Text className="text-xl font-bold text-black">{item.label}</Text>
