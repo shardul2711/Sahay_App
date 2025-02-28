@@ -44,7 +44,7 @@ const SignIn = () => {
         .single();
 
       if (data) {
-        router.replace('/(NGO)/Home');
+        router.replace('/(NGO)/home');
         return;
       }
 
