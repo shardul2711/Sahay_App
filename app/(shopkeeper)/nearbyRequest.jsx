@@ -2,18 +2,20 @@ import React, { useState, useEffect } from "react";
 import { View, Alert, FlatList, Text, TouchableOpacity } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
+import { useAuth } from "../../context/AuthContext";
+import supabase from "../../supabase/supabaseConfig";
 
 const NearbyRequest = () => {
+  const { user } = useAuth();
   const [location, setLocation] = useState(null);
   const [selectedMarker, setSelectedMarker] = useState(null);
   const [region, setRegion] = useState(null);
-  const [requests, setRequests] = useState([
-    { id: "1", title: "Food Donation Drive", location: "Community Center", latitude: 20.014836936929253, longitude: 73.82184366677026 },
-    { id: "2", title: "Blood Donation Camp", location: "City Hospital", latitude: 20.5965, longitude: 78.9655 },
-    { id: "3", title: "Clothes for the Needy", location: "Downtown Shelter", latitude: 20.5940, longitude: 78.9630 },
-  ]);
+  const [requests, setRequests] = useState([]);
+  const [acceptedRequests, setAcceptedRequests] = useState([]);
 
   useEffect(() => {
+    fetchCampaigns();
+
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
@@ -35,13 +37,57 @@ const NearbyRequest = () => {
     })();
   }, []);
 
+  // Fetch only campaigns where isAccepted is false
+  const fetchCampaigns = async () => {
+    const { data, error } = await supabase.from("campaigns").select("*").neq("isAccepted", true);
+    if (error) {
+      Alert.alert("Error", "Failed to fetch campaign data.");
+      console.error(error);
+    } else {
+      setRequests(data);
+    }
+  };
+
+  // Confirm and accept a request
+  const acceptRequest = async (id) => {
+    Alert.alert(
+      "Confirm Acceptance",
+      "Are you sure you want to accept this request?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Accept",
+          onPress: async () => {
+            const { error } = await supabase.from("campaigns").update({
+              isAccepted: true,
+              acceptedByUserName: user?.name,
+              providerid: user?.providerid,
+            }).eq("id", id);
+
+            if (error) {
+              Alert.alert("Error", "Failed to accept the request.");
+              console.error(error);
+            } else {
+              Alert.alert("Success", "You have accepted the request.");
+              fetchCampaigns();
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <View style={{ flex: 1 }}>
-      <View style={{flex: 1, padding: 10, backgroundColor: "#f8f8f8" }}>
+      {/* Nearby Requests Section */}
+      <View style={{ flex: 1, padding: 10, backgroundColor: "#f8f8f8" }}>
         <Text style={{ fontSize: 18, marginBottom: 10 }}>Nearby Requests</Text>
         <FlatList
           data={requests}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => {
@@ -53,20 +99,34 @@ const NearbyRequest = () => {
                   longitudeDelta: 0.01,
                 });
               }}
-              style={{ padding: 10, backgroundColor: "white", marginBottom: 10, borderRadius: 8, shadowColor: "#000", shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }}
+              className="flex-row items-center w-full"
+              style={{
+                padding: 10,
+                backgroundColor: "white",
+                marginBottom: 10,
+                borderRadius: 8,
+                shadowColor: "#000",
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 2,
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
             >
-              <Text style={{ fontSize: 16, fontWeight: "bold" }}>{item.title}</Text>
-              <Text style={{ color: "gray" }}>{item.location}</Text>
+              <View>
+                <Text className="text-lg font-extrabold">{item.title}</Text>
+                <Text className="text-gray-600">{item.location}</Text>
+              </View>
+              <TouchableOpacity onPress={() => acceptRequest(item.id)}>
+                <Text className="text-lg text-blue-700 font-outfitBold">Accept</Text>
+              </TouchableOpacity>
             </TouchableOpacity>
           )}
         />
       </View>
-      
-      <MapView
-        style={{ flex: 2 }}
-        region={region}
-        showsUserLocation={true}
-      >
+      {/* Map Section */}
+      <MapView style={{ flex: 2 }} region={region} showsUserLocation={true}>
         {location && (
           <Marker
             coordinate={{ latitude: location.latitude, longitude: location.longitude }}
