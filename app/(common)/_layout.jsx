@@ -10,6 +10,7 @@ const CommonLayout = () => {
       <Stack.Screen name="Chatbot" options={{ headerShown: false }} />
       <Stack.Screen name="documentVerification" options={{ headerShown: false }} />
       <Stack.Screen name="completeKYC" options={{ headerShown: false }} />
+      <Stack.Screen name="Verification" options={{ headerShown: false }} />
     </Stack>
   );
 };
