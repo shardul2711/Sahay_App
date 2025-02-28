@@ -10,9 +10,10 @@ import {
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
-import * as ImagePicker from "expo-image-picker";
+import * as DocumentPicker from "expo-document-picker";
 import supabase from "../../supabase/supabaseConfig"; // Ensure correct path
 import { useRouter } from "expo-router";
+import { useAuth } from "../../context/AuthContext";
 
 const FormField = ({
   title,
@@ -65,56 +66,41 @@ const CompleteKYC = () => {
   const [consent, setConsent] = useState(null);
   const [tandc, setTandc] = useState(null);
   const [aml, setAml] = useState(null);
-  const [providerId, setProviderId] = useState(null);
-  const [providerName, setProviderName] = useState("");
   const [uploading, setUploading] = useState(false);
   const router = useRouter();
+  const { user } = useAuth();
+  // const handleImagePick = async (setImage) => {
+  //   try {
+  //     const result = await ImagePicker.launchImageLibraryAsync({
+  //       mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  //       allowsEditing: true,
+  //       aspect: [4, 3],
+  //       quality: 1,
+  //     });
 
-  useEffect(() => {
-    // Fetch the current logged-in provider's details
-    const fetchProviderDetails = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setProviderId(user.id);
-        setProviderName(user.email); // Assuming the provider's name is their email
-      }
-    };
-
-    fetchProviderDetails();
-  }, []);
-
-  const handleImagePick = async (setImage) => {
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
-      });
-
-      if (!result.canceled) {
-        setImage(result.assets[0]);
-      }
-    } catch (error) {
-      console.error("Error picking image:", error);
-    }
-  };
+  //     if (!result.canceled) {
+  //       setImage(result.assets[0]);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error picking image:", error);
+  //   }
+  // };
 
   const uploadToSupabase = async (file, setUrl) => {
     if (!file) {
-      Alert.alert("Error", "No image selected.");
+      Alert.alert("Error", "No document selected.");
       return;
     }
 
     setUploading(true);
-    const fileExt = file.uri.split(".").pop();
+    const fileExt = file.name.split(".").pop();
     const filePath = `images/${Date.now()}.${fileExt}`;
 
     const { data, error } = await supabase.storage
       .from("documents")
       .upload(filePath, {
         uri: file.uri,
-        contentType: file.type,
+        contentType: file.mimeType,
         name: file.name,
       });
 
@@ -124,11 +110,26 @@ const CompleteKYC = () => {
       Alert.alert("Upload Failed", error.message);
     } else {
       const publicUrl = `https://zsrhvbqsmlruustctgni.supabase.co/storage/v1/object/public/documents/${filePath}`;
-      console,log(publicUrl)
       setUrl(publicUrl);
-      Alert.alert("Success", "Image uploaded successfully.");
+      Alert.alert("Success", "File uploaded successfully.");
     }
   };
+
+  const handleImagePick = async (setUrl) => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "image/*",
+      });
+
+      if (result.canceled || result.assets.length === 0) return;
+
+      const file = result.assets[0];
+      await uploadToSupabase(file, setUrl);
+    } catch (error) {
+      console.error("Error picking image:", error);
+    }
+  };
+
 
   const handleSubmit = async () => {
     if (
@@ -149,20 +150,13 @@ const CompleteKYC = () => {
 
     setUploading(true);
 
-    // Upload images to Supabase Storage
-    await uploadToSupabase(addressproof, setAddressproof);
-    await uploadToSupabase(consent, setConsent);
-    await uploadToSupabase(tandc, setTandc);
-    await uploadToSupabase(aml, setAml);
-    console.log(addressproof , consent, tandc, aml);
-
     // Insert data into Supabase table
     const { data, error } = await supabase
       .from("kyc")
       .insert([
         {
-          providerId,
-          providerName,
+          providerId: user?.providerid,
+          providerName: user?.name,
           fname,
           email,
           mobile,
@@ -259,7 +253,7 @@ const CompleteKYC = () => {
         </View>
         {addressproof && (
           <Image
-            source={{ uri: addressproof.uri }}
+            source={{ uri: addressproof }}
             className="w-24 h-24 mt-2"
           />
         )}
@@ -279,7 +273,7 @@ const CompleteKYC = () => {
           <MaterialIcons name="attach-file" size={24} color="black" />
         </View>
         {consent && (
-          <Image source={{ uri: consent.uri }} className="w-24 h-24 mt-2" />
+          <Image source={{ uri: consent }} className="w-24 h-24 mt-2" />
         )}
       </TouchableOpacity>
 
@@ -297,7 +291,7 @@ const CompleteKYC = () => {
           <MaterialIcons name="attach-file" size={24} color="black" />
         </View>
         {tandc && (
-          <Image source={{ uri: tandc.uri }} className="w-24 h-24 mt-2" />
+          <Image source={{ uri: tandc }} className="w-24 h-24 mt-2" />
         )}
       </TouchableOpacity>
 
@@ -314,7 +308,7 @@ const CompleteKYC = () => {
           </Text>
           <MaterialIcons name="attach-file" size={24} color="black" />
         </View>
-        {aml && <Image source={{ uri: aml.uri }} className="w-24 h-24 mt-2" />}
+        {aml && <Image source={{ uri: aml }} className="w-24 h-24 mt-2" />}
       </TouchableOpacity>
 
       <TouchableOpacity

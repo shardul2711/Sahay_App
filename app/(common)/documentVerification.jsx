@@ -58,8 +58,7 @@ const DocumentVerification = () => {
   const [uploading, setUploading] = useState(false);
   const router = useRouter();
   const { user } = useAuth();
-  console.log(user);
-
+  
   const uploadToSupabase = async (file, setUrl) => {
     if (!file) {
       Alert.alert("Error", "No document selected.");
@@ -68,7 +67,7 @@ const DocumentVerification = () => {
 
     setUploading(true);
     const fileExt = file.name.split(".").pop();
-    const filePath = `images/${Date.now()}.${fileExt}`;
+    const filePath = `documents/${Date.now()}.${fileExt}`;
 
     const { data, error } = await supabase.storage
       .from("documents")
@@ -92,7 +91,7 @@ const DocumentVerification = () => {
   const handleFilePick = async (setUrl) => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
-        type: "application/pdf",
+        type: "image/*",
       });
 
       if (result.canceled || result.assets.length === 0) return;
