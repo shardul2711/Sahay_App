@@ -10,8 +10,9 @@ const CommonLayout = () => {
       <Stack.Screen name="Chatbot" options={{ headerShown: false }} />
       <Stack.Screen name="documentVerification" options={{ headerShown: false }} />
       <Stack.Screen name="completeKYC" options={{ headerShown: false }} />
-       <Stack.Screen name="shopkeeper_profile" options={{ headerShown: false }} />
-      <Stack.Screen name="verification" options={{ headerShown: false }} />
+      <Stack.Screen name="shopkeeper_profile" options={{ headerShown: false }} />
+      <Stack.Screen name="Verification" options={{ headerShown: false }} />
+      <Stack.Screen name="Complaint" options={{ headerShown: false }} />
     </Stack>
   );
 };

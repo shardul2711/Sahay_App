@@ -4,7 +4,7 @@ import React from "react";
 const recentStats = [
   { id: "1", value: "03", label: "Active Campaign" },
   { id: "2", value: "15", label: "Active Investors", highlight: true },
-  { id: "3", value: "$50k", label: "Total Funding" },
+  { id: "3", value: "₹50k", label: "Total Funding" },
 ];
 
 const RecentStatus = () => {
