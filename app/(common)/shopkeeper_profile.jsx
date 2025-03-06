@@ -49,6 +49,12 @@ const ShopkeeperProfile = () => {
     buttonStyle='bg-purple-700'
     textStyle="text-black font-bold"
   />
+  <Button
+    title="Register Complaint"
+    onPress={() => router.push('/Complaint')}
+    buttonStyle='bg-black'
+    textStyle="text-black font-bold"
+  />
 </View>
     </View>
   );

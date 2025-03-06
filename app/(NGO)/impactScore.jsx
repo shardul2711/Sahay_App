@@ -2,10 +2,13 @@ import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { FontAwesome } from '@expo/vector-icons';
 import supabase from '../../supabase/supabaseConfig';
+import Button from '../../components/Button'; 
+import { useRouter } from 'expo-router'; // ✅ Import useRouter
 
 const ImpactScore = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter(); // ✅ Get router object
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -63,11 +66,17 @@ const ImpactScore = () => {
           </View>
         ))}
       </View>
+      
       <View className="mt-4 p-3 border border-black rounded-lg bg-gray-100">
         <Text className="text-2xl font-cormorantGaramondBoldItalic text-blue-900">How Impact Score is Calculated?</Text>
         <Text className="mt-2 text-lg">- Based on the total amount donated.</Text>
         <Text className="text-lg">- Consideration of donor's status and consistency.</Text>
         <Text className="text-lg">- Extra points for donations in critical situations.</Text>
+      </View>
+      
+      {/* Register Complaint Button */}
+      <View className="mt-6 items-center">
+        <Button title="Register Complaint" onPress={() => router.push('/Complaint')} />
       </View>
     </ScrollView>
   );
