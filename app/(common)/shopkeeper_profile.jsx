@@ -44,12 +44,6 @@ const ShopkeeperProfile = () => {
 
       <View className="items-center mt-4">
   <Button
-    title="Sell Token"
-    onPress={() => Alert.alert("Sell Token", "Token Sell successful!!")}
-    buttonStyle='bg-purple-700'
-    textStyle="text-black font-bold"
-  />
-  <Button
     title="Register Complaint"
     onPress={() => router.push('/Complaint')}
     buttonStyle='bg-black'

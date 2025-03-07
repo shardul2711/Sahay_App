@@ -83,7 +83,7 @@ const Verification = () => {
 
     setUploading(true);
     try {
-      const response = await fetch("http://192.168.16.176:8080/analyze-image/", {
+      const response = await fetch("http://10.25.23.158:8000/analyze-image/", {
         method: "POST",
         body: formData,
         headers: { "Content-Type": "multipart/form-data" },
@@ -136,6 +136,7 @@ const Verification = () => {
         .update({
           md5hash: md5Hash,
           validationImage: uploadedImageLink,
+          Donationstatus: "CampaignCompleted"
         })
         .eq("id", id);
 

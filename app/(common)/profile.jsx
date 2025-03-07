@@ -5,8 +5,6 @@ import { Picker } from '@react-native-picker/picker';
 import * as Location from 'expo-location';
 import { MaterialIcons } from '@expo/vector-icons';
 import supabase from '../../supabase/supabaseConfig';
-import Button from '../../components/Button';
-import { ScrollView } from 'react-native-gesture-handler';
 
 const Profile = () => {
   const router = useRouter();
@@ -94,7 +92,6 @@ const Profile = () => {
 
   return (
    
-
     <View className="flex-1 bg-white p-6">
       {/* Header with Logout */}
       <View className="flex-row justify-between items-center mb-6">
@@ -137,11 +134,6 @@ const Profile = () => {
         <TouchableOpacity className={`p-3 rounded ${saving ? 'bg-gray-400' : 'bg-black'}`} onPress={handleSaveLocation} disabled={saving}>
           <Text className="text-white text-center">{saving ? 'Saving...' : 'Save Location'}</Text>
         </TouchableOpacity>
-
-        {/* Buy Token Button */}
-        <View className="items-center mt-4">
-          <Button title="Buy Token" onPress={openMetaMask} buttonStyle='bg-purple-700' textStyle="text-black font-bold" />
-        </View>
       </View>
     </View>
   );

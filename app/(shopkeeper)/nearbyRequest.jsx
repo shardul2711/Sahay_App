@@ -84,7 +84,7 @@ const NearbyRequest = () => {
     <View style={{ flex: 1 }}>
       {/* Nearby Requests Section */}
       <View style={{ flex: 1, padding: 10, backgroundColor: "#f8f8f8" }}>
-        <Text style={{ fontSize: 18, marginBottom: 10 }}>Nearby Requests</Text>
+        <Text className="font-cormorantGaramondSemiBold text-3xl p-2 text-blue-800">Nearby Requests</Text>
         <FlatList
           data={requests}
           keyExtractor={(item) => item.id.toString()}
@@ -126,7 +126,7 @@ const NearbyRequest = () => {
         />
       </View>
       {/* Map Section */}
-      <MapView style={{ flex: 2 }} region={region} showsUserLocation={true}>
+      <MapView style={{ flex: 1 }} region={region} showsUserLocation={true} >
         {location && (
           <Marker
             coordinate={{ latitude: location.latitude, longitude: location.longitude }}
