@@ -5,6 +5,9 @@ import { Picker } from '@react-native-picker/picker';
 import * as Location from 'expo-location';
 import { MaterialIcons } from '@expo/vector-icons';
 import supabase from '../../supabase/supabaseConfig';
+import { AppKitButton } from '@reown/appkit-ethers-react-native'
+import { Pressable } from 'react-native'
+import { useAppKit } from '@reown/appkit-ethers-react-native'
 
 const Profile = () => {
   const router = useRouter();
@@ -12,6 +15,7 @@ const Profile = () => {
   const [saving, setSaving] = useState(false);
   const [location, setLocation] = useState('');
   const [user, setUser] = useState(null);
+  const { open } = useAppKit()
 
   // Fetch logged-in user
   useEffect(() => {
@@ -100,7 +104,9 @@ const Profile = () => {
           <MaterialIcons name="logout" size={28} color="black" />
         </TouchableOpacity>
       </View>
-
+      <View>
+        <AppKitButton />
+      </View>
       {/* User Details */}
       <View className="bg-gray-100 p-6 rounded-lg shadow-lg">
         <Text className="text-xl font-semibold mb-4 text-black">User Details</Text>
