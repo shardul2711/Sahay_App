@@ -1,4 +1,4 @@
-import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, Linking } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, Linking , } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
@@ -6,6 +6,7 @@ import * as Location from 'expo-location';
 import { MaterialIcons } from '@expo/vector-icons';
 import supabase from '../../supabase/supabaseConfig';
 import Button from '../../components/Button';
+import { ScrollView } from 'react-native-gesture-handler';
 
 const Profile = () => {
   const router = useRouter();
@@ -92,6 +93,8 @@ const Profile = () => {
   if (!user) return <Text className="text-center text-red-500">User not found</Text>;
 
   return (
+   
+
     <View className="flex-1 bg-white p-6">
       {/* Header with Logout */}
       <View className="flex-row justify-between items-center mb-6">
